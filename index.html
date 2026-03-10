@@ -552,20 +552,24 @@ async function loadTodaySpend() {
     const events = await r.json();
     if (!Array.isArray(events)) return;
 
-    // Total spend
+    // Sum cost_estimate from metadata (pushed directly by Metabot on each action)
     let total = 0, byProvider = { anthropic: 0, google: 0 };
     events.forEach(e => {
-      const cost = e.metadata?.cost_estimate || costForModel(e.model);
+      const cost = parseFloat(e.metadata?.cost_estimate) || 0;
       total += cost;
       if (e.model?.includes('claude')) byProvider.anthropic += cost;
       else if (e.model?.includes('gemini')) byProvider.google += cost;
     });
 
-    document.getElementById('todaySpend').textContent = `~$${total.toFixed(4)}`;
+    const hasRealData = total > 0;
+    document.getElementById('todaySpend').textContent = hasRealData ? `$${total.toFixed(4)}` : '$0.00';
+    document.getElementById('todaySpendSub').textContent = hasRealData
+      ? `${events.length} events · live from pipeline`
+      : 'No events logged today yet';
     document.getElementById('todaySpendBreakdown').innerHTML = `
       <div class="flex justify-between text-xs"><span class="text-slate-500">Anthropic</span><span class="text-orange-300 mono">$${byProvider.anthropic.toFixed(4)}</span></div>
       <div class="flex justify-between text-xs"><span class="text-slate-500">Google</span><span class="text-teal-300 mono">$${byProvider.google.toFixed(4)}</span></div>
-      <div class="flex justify-between text-xs mt-1 pt-1 border-t border-slate-800"><span class="text-slate-400 font-medium">${events.length} events tracked</span><span class="text-slate-600">today</span></div>`;
+      <div class="flex justify-between text-xs mt-1 pt-1 border-t border-slate-800"><span class="text-slate-400 font-medium">${events.length} events</span><span class="text-slate-600">updated in real-time</span></div>`;
 
     // Track costs
     const byTrack = {};

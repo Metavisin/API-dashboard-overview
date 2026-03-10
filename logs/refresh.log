@@ -34,3 +34,12 @@ To https://github.com/Metavisin/API-dashboard-overview.git
    6024bbc..d3c8c3a  main -> main
 [2026-03-10 14:59:11 CET] ✅ Pushed — dashboard live at https://metavisin.github.io/API-dashboard-overview/
 [2026-03-10 14:59:11 CET] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2026-03-10 15:59:11 CET] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2026-03-10 15:59:11 CET] 🔄 AI Cockpit refresh starting
+[2026-03-10 15:59:12 CET] 📊 Generating usage-data.json...
+[main fa3fc66] data: hourly refresh — 2026-03-10 15:59 CET
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+To https://github.com/Metavisin/API-dashboard-overview.git
+   338520e..fa3fc66  main -> main
+[2026-03-10 15:59:15 CET] ✅ Pushed — dashboard live at https://metavisin.github.io/API-dashboard-overview/
+[2026-03-10 15:59:15 CET] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
