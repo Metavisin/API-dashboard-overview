@@ -346,12 +346,7 @@ function render(d){
   // Timestamp
   document.getElementById('lastUpdated').textContent = 'Updated ' + fmtDate(d.generated_at);
 
-  // Budget
-  const cap   = d.budget?.spend_cap ?? null;
-  const setAt = d.budget?.set_at ? new Date(d.budget.set_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) : '—';
-  document.getElementById('budgetVal').textContent       = cap !== null ? `$${cap.toFixed(2)}` : '—';
-  document.getElementById('budgetDate').textContent      = `Max spend limit`;
-  document.getElementById('budgetDateInline').textContent = setAt;
+  // Budget (spend cap - removed from UI, kept for reference only)
 
   // Errors today
   const errCount = d.errors_today || 0;
