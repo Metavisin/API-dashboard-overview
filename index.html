@@ -74,22 +74,19 @@
 <!-- KPI Row -->
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
 
-  <!-- Budget -->
+  <!-- Today's Spend -->
   <div class="glass glass-hover rounded-2xl p-5 anthropic-glow fade-in">
-    <div class="flex items-start justify-between mb-4">
+    <div class="flex items-start justify-between mb-3">
       <div>
-        <p class="text-xs text-slate-500 uppercase tracking-wider font-medium">Spend Cap</p>
-        <p id="budgetVal" class="text-3xl font-bold text-white mt-1">—</p>
-        <p id="budgetDate" class="text-xs text-slate-500 mt-0.5"></p>
+        <p class="text-xs text-slate-500 uppercase tracking-wider font-medium">Spent Today</p>
+        <p id="todaySpend" class="text-3xl font-bold text-white mt-1">—</p>
+        <p id="todaySpendSub" class="text-xs text-slate-500 mt-0.5">calculated from pipeline events</p>
       </div>
       <div class="w-10 h-10 rounded-xl bg-orange-500/15 flex items-center justify-center flex-shrink-0">
         <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
       </div>
     </div>
-    <div class="rounded-xl bg-slate-800/60 border border-slate-700/50 p-3">
-      <p class="text-xs text-slate-400 leading-relaxed">Maximum OpenClaw will spend before pausing. Set on <span id="budgetDateInline" class="text-slate-300"></span>.</p>
-      <p class="text-xs text-slate-600 mt-2">Actual spend tracking → connect Anthropic Admin API key</p>
-    </div>
+    <div id="todaySpendBreakdown" class="space-y-1.5 mt-3 pt-3 border-t border-slate-800"></div>
   </div>
 
   <!-- Active Model -->
@@ -187,18 +184,18 @@
       </div>
       <div>
         <h2 class="text-sm font-semibold text-white">Anthropic API</h2>
-        <p class="text-xs text-slate-500">api_key mode · estimated costs</p>
+        <p class="text-xs text-slate-500">OAuth primary · API key fallback</p>
       </div>
     </div>
     <div id="anthropicModels" class="space-y-3 min-h-[80px]"></div>
     <div class="mt-4 pt-4 border-t border-slate-800 flex items-center justify-between">
       <div>
-        <p class="text-xs text-slate-500">Est. cost today</p>
+        <p class="text-xs text-slate-500">Cost today</p>
         <p id="anthropicCostToday" class="text-xl font-bold text-orange-400">—</p>
       </div>
       <div class="text-right">
-        <p class="text-xs text-slate-600">Connect Admin Key</p>
-        <p class="text-xs text-slate-600">for exact figures →</p>
+        <p class="text-xs text-slate-600">Admin key for</p>
+        <p class="text-xs text-indigo-400 font-medium cursor-pointer" onclick="window.open('https://platform.claude.com/settings/admin-keys','_blank')">exact figures →</p>
       </div>
     </div>
   </div>
@@ -217,7 +214,7 @@
     <div id="googleModels" class="space-y-3 min-h-[80px]"></div>
     <div class="mt-4 pt-4 border-t border-slate-800 flex items-center justify-between">
       <div>
-        <p class="text-xs text-slate-500">Est. cost today</p>
+        <p class="text-xs text-slate-500">Cost today</p>
         <p id="googleCostToday" class="text-xl font-bold text-teal-400">—</p>
       </div>
       <div class="text-right">
@@ -252,6 +249,20 @@
 </div>
 
 </div><!-- /mainContent -->
+
+<!-- Cost by Track -->
+<div class="glass rounded-2xl p-5 mt-5 fade-in">
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <h2 class="text-sm font-semibold text-white">Cost by Track</h2>
+      <p class="text-xs text-slate-500 mt-0.5">Spend per MetaVision track · from tagged pipeline events</p>
+    </div>
+    <span id="trackDataAge" class="text-xs text-slate-600"></span>
+  </div>
+  <div id="trackCostBars" class="space-y-3">
+    <p class="text-xs text-slate-600 italic">Track data populates as workers are spawned with track context.</p>
+  </div>
+</div>
 
 <!-- Live Pipeline -->
 <div class="glass rounded-2xl p-5 mt-5 fade-in">
@@ -467,6 +478,80 @@ function buildCostChart(costSplit){
   }).join('');
 }
 
+// ── Today's Spend + Track Costs (from Supabase) ──────────────────────────────
+
+const MODEL_COST = {
+  'claude-sonnet-4-6': 0.018, 'claude-opus-4-6': 0.090, 'claude-haiku-4-5': 0.004,
+  'claude-sonnet': 0.018, 'claude-opus': 0.090, 'claude-haiku': 0.004,
+  'gemini-3.1-pro': 0.006, 'gemini-3-flash': 0.0004, 'gemini-flash': 0.0004, 'gemini-pro': 0.006,
+};
+const TRACK_COLORS = {
+  'fibreguard': 'bg-purple-400', 'mvi-crm': 'bg-orange-400',
+  'polymarket': 'bg-teal-400', 'n8n': 'bg-blue-400', 'general': 'bg-slate-400',
+};
+
+function costForModel(model) {
+  if (!model) return 0;
+  const m = model.toLowerCase();
+  for (const [key, price] of Object.entries(MODEL_COST)) { if (m.includes(key)) return price; }
+  return 0.005;
+}
+
+async function loadTodaySpend() {
+  const today = new Date().toISOString().slice(0, 10);
+  try {
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/pipeline_events?created_at=gte.${today}T00:00:00Z&select=model,metadata,event_type`,
+      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+    );
+    const events = await r.json();
+    if (!Array.isArray(events)) return;
+
+    // Total spend
+    let total = 0, byProvider = { anthropic: 0, google: 0 };
+    events.forEach(e => {
+      const cost = e.metadata?.cost_estimate || costForModel(e.model);
+      total += cost;
+      if (e.model?.includes('claude')) byProvider.anthropic += cost;
+      else if (e.model?.includes('gemini')) byProvider.google += cost;
+    });
+
+    document.getElementById('todaySpend').textContent = `~$${total.toFixed(4)}`;
+    document.getElementById('todaySpendBreakdown').innerHTML = `
+      <div class="flex justify-between text-xs"><span class="text-slate-500">Anthropic</span><span class="text-orange-300 mono">$${byProvider.anthropic.toFixed(4)}</span></div>
+      <div class="flex justify-between text-xs"><span class="text-slate-500">Google</span><span class="text-teal-300 mono">$${byProvider.google.toFixed(4)}</span></div>
+      <div class="flex justify-between text-xs mt-1 pt-1 border-t border-slate-800"><span class="text-slate-400 font-medium">${events.length} events tracked</span><span class="text-slate-600">today</span></div>`;
+
+    // Track costs
+    const byTrack = {};
+    events.forEach(e => {
+      const track = e.metadata?.track;
+      if (!track) return;
+      const cost = e.metadata?.cost_estimate || costForModel(e.model);
+      byTrack[track] = (byTrack[track] || 0) + cost;
+    });
+
+    const trackEl = document.getElementById('trackCostBars');
+    const trackEntries = Object.entries(byTrack).sort(([,a],[,b]) => b - a);
+    if (trackEntries.length > 0) {
+      const maxCost = trackEntries[0][1];
+      trackEl.innerHTML = trackEntries.map(([track, cost]) => {
+        const pct = Math.round((cost / maxCost) * 100);
+        const color = TRACK_COLORS[track.toLowerCase()] || 'bg-slate-400';
+        return `<div>
+          <div class="flex justify-between text-xs mb-1.5">
+            <span class="text-slate-300 font-medium capitalize">${track}</span>
+            <span class="text-white mono font-medium">$${cost.toFixed(4)}</span>
+          </div>
+          <div class="w-full bg-slate-800 rounded-full h-1.5">
+            <div class="${color} h-1.5 rounded-full bar-fill" style="width:${pct}%"></div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  } catch(e) { console.error('Spend load error', e); }
+}
+
 // ── Live Pipeline (Supabase Realtime) ────────────────────────────────────────
 
 const SUPABASE_URL = 'https://pxwlwtlowvhytiyepjzk.supabase.co';
@@ -544,7 +629,9 @@ function initPipeline() {
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 loadData();
-setInterval(loadData, 5 * 60 * 1000); // auto-refresh every 5 min
+loadTodaySpend();
+setInterval(loadData, 5 * 60 * 1000);
+setInterval(loadTodaySpend, 60 * 1000); // refresh spend every minute
 initPipeline();
 </script>
 </body>
