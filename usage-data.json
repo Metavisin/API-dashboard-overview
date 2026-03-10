@@ -1,0 +1,243 @@
+{
+  "generated_at": "2026-03-10T10:45:32.113123+00:00",
+  "budget": {
+    "balance": 6.77,
+    "set_at": "2026-03-05T14:58:28.813Z",
+    "limit": 10.0
+  },
+  "errors_today": 8,
+  "rate_events": [
+    {
+      "time": "10:19:09",
+      "date": "2026-03-10",
+      "msg": "Error: All models failed (5): anthropic/claude-sonnet-4-6: \u26a0\ufe0f API rate limit reached. Please try again late"
+    },
+    {
+      "time": "10:19:25",
+      "date": "2026-03-10",
+      "msg": "Error: All models failed (5): anthropic/claude-sonnet-4-6: \u26a0\ufe0f API rate limit reached. Please try again late"
+    },
+    {
+      "time": "10:19:27",
+      "date": "2026-03-10",
+      "msg": "Error: All models failed (5): anthropic/claude-sonnet-4-6: \u26a0\ufe0f API rate limit reached. Please try again late"
+    },
+    {
+      "time": "10:19:34",
+      "date": "2026-03-10",
+      "msg": "Error: All models failed (5): anthropic/claude-sonnet-4-6: \u26a0\ufe0f API rate limit reached. Please try again late"
+    },
+    {
+      "time": "10:31:38",
+      "date": "2026-03-10",
+      "msg": "Error: All models failed (5): anthropic/claude-sonnet-4-6: \u26a0\ufe0f API rate limit reached. Please try again late"
+    },
+    {
+      "time": "10:32:25",
+      "date": "2026-03-10",
+      "msg": "Error: All models failed (5): anthropic/claude-sonnet-4-6: \u26a0\ufe0f API rate limit reached. Please try again late"
+    },
+    {
+      "time": "10:33:09",
+      "date": "2026-03-10",
+      "msg": "Error: All models failed (5): anthropic/claude-sonnet-4-6: \u26a0\ufe0f API rate limit reached. Please try again late"
+    },
+    {
+      "time": "10:33:53",
+      "date": "2026-03-10",
+      "msg": "Error: All models failed (5): anthropic/claude-sonnet-4-6: \u26a0\ufe0f API rate limit reached. Please try again late"
+    }
+  ],
+  "chart": {
+    "labels": [
+      "02-25",
+      "02-26",
+      "02-27",
+      "02-28",
+      "03-01",
+      "03-02",
+      "03-03",
+      "03-04",
+      "03-05",
+      "03-06",
+      "03-07",
+      "03-08",
+      "03-09",
+      "03-10"
+    ],
+    "sonnet": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      64,
+      0,
+      0,
+      0,
+      20,
+      25
+    ],
+    "opus": [
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      23,
+      0,
+      0,
+      0,
+      6,
+      22
+    ],
+    "haiku": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      13,
+      0,
+      0,
+      0,
+      4,
+      20
+    ],
+    "gemini_pro": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      4
+    ],
+    "gemini_flash": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      5
+    ]
+  },
+  "today_models": [
+    {
+      "model": "anthropic/claude-sonnet-4-6",
+      "calls": 17,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 306.0
+    },
+    {
+      "model": "anthropic/claude-opus-4-6",
+      "calls": 16,
+      "provider": "anthropic",
+      "family": "Claude Opus",
+      "est_cost": 1440.0
+    },
+    {
+      "model": "anthropic/claude-haiku...",
+      "calls": 16,
+      "provider": "anthropic",
+      "family": "Claude Haiku",
+      "est_cost": 76.8
+    },
+    {
+      "model": "google/gemini-3.1-pro-preview",
+      "calls": 2,
+      "provider": "google",
+      "family": "Gemini Pro",
+      "est_cost": 12.0
+    },
+    {
+      "model": "anthropic/claude-sonnet-4-5-20250929",
+      "calls": 1,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 18.0
+    },
+    {
+      "model": "anthropic/claude-sonnet-4-0",
+      "calls": 1,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 18.0
+    },
+    {
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "calls": 1,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 18.0
+    },
+    {
+      "model": "anthropic/claude-3-7-sonnet-latest",
+      "calls": 1,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 10.0
+    },
+    {
+      "model": "anthropic/claude-3-7-sonnet-20250219",
+      "calls": 1,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 10.0
+    },
+    {
+      "model": "anthropic/claude-3-5-sonnet-20241022",
+      "calls": 1,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 10.0
+    },
+    {
+      "model": "anthropic/claude-3-5-sonnet-20240620",
+      "calls": 1,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 10.0
+    },
+    {
+      "model": "anthropic/claude-3-sonnet-20240229",
+      "calls": 1,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 10.0
+    }
+  ],
+  "cost_split": {
+    "Claude Opus": 4460.0,
+    "Claude Sonnet": 1780.0,
+    "Claude Haiku": 255.60000000000002,
+    "Gemini Pro": 28.0,
+    "Gemini Flash": 30.8
+  },
+  "total_sessions": 72
+}

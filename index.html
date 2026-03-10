@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MetaVision · AI Usage Cockpit</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+  * { box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #0a0b0f; color: #e2e8f0; margin: 0; min-height: 100vh; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .glass { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(12px); }
+  .glass-hover { transition: background 0.2s; cursor: default; }
+  .glass-hover:hover { background: rgba(255,255,255,0.07); }
+  .anthropic-glow { box-shadow: 0 0 24px rgba(251,146,60,0.08); border-color: rgba(251,146,60,0.18) !important; }
+  .google-glow    { box-shadow: 0 0 24px rgba(45,212,191,0.08);  border-color: rgba(45,212,191,0.18) !important; }
+  .alert-glow     { box-shadow: 0 0 24px rgba(239,68,68,0.12);   border-color: rgba(239,68,68,0.25) !important; }
+  .pulse-dot { animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .tag { display:inline-flex;align-items:center;padding:2px 8px;border-radius:9999px;font-size:11px;font-weight:500; }
+  .bar-fill { transition: width 1.2s cubic-bezier(.4,0,.2,1); }
+  .scrollbar-thin::-webkit-scrollbar{width:4px}
+  .scrollbar-thin::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+  .spinner { border:2px solid rgba(255,255,255,.08); border-top-color:#6366f1; border-radius:50%; width:20px; height:20px; animation:spin .7s linear infinite; display:inline-block; }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .fade-in { animation: fadeIn .4s ease; }
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body class="p-5 lg:p-8">
+
+<!-- Header -->
+<div class="flex flex-wrap items-center justify-between gap-4 mb-7">
+  <div class="flex items-center gap-3">
+    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xl shadow-lg">🤖</div>
+    <div>
+      <h1 class="text-lg font-semibold text-white leading-tight">AI Usage Cockpit</h1>
+      <p class="text-xs text-slate-500">MetaVision · Metabot delegation overview</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-3">
+    <div id="lastUpdated" class="text-xs text-slate-600 mono bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">Loading...</div>
+    <button onclick="loadData()" class="text-xs font-medium px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors">↻ Refresh</button>
+  </div>
+</div>
+
+<!-- Loading -->
+<div id="loadingState" class="flex items-center justify-center py-24 gap-3">
+  <span class="spinner"></span>
+  <span class="text-slate-500 text-sm">Fetching latest data...</span>
+</div>
+
+<!-- Main content (hidden until loaded) -->
+<div id="mainContent" class="hidden">
+
+<!-- Rate Limit Alert (conditional) -->
+<div id="rateLimitBanner" class="hidden glass alert-glow rounded-2xl p-4 mb-6 flex items-start gap-3 fade-in">
+  <div class="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center flex-shrink-0">
+    <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+  </div>
+  <div class="flex-1 min-w-0">
+    <div class="flex flex-wrap items-center gap-2 mb-1">
+      <span class="text-sm font-semibold text-red-400">Rate Limit Events Today</span>
+      <span id="rlCount" class="tag bg-red-500/20 text-red-400"></span>
+    </div>
+    <p class="text-xs text-slate-400" id="rlSummary"></p>
+  </div>
+  <button onclick="this.closest('#rateLimitBanner').classList.add('hidden')" class="text-slate-600 hover:text-slate-400 text-xl leading-none flex-shrink-0">×</button>
+</div>
+
+<!-- KPI Row -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+
+  <!-- Budget -->
+  <div class="glass glass-hover rounded-2xl p-5 anthropic-glow fade-in">
+    <div class="flex items-start justify-between mb-4">
+      <div>
+        <p class="text-xs text-slate-500 uppercase tracking-wider font-medium">OpenClaw Budget</p>
+        <p id="budgetVal" class="text-3xl font-bold text-white mt-1">—</p>
+        <p id="budgetDate" class="text-xs text-slate-500 mt-0.5"></p>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-orange-500/15 flex items-center justify-center flex-shrink-0">
+        <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+    </div>
+    <div class="w-full bg-slate-800 rounded-full h-1.5 mb-1.5">
+      <div id="budgetBar" class="bg-gradient-to-r from-orange-500 to-yellow-400 h-1.5 rounded-full bar-fill" style="width:0%"></div>
+    </div>
+    <div class="flex justify-between">
+      <span class="text-xs text-slate-600">$0</span>
+      <span id="budgetPct" class="text-xs text-orange-400 font-medium"></span>
+      <span class="text-xs text-slate-600">$10</span>
+    </div>
+  </div>
+
+  <!-- Active Model -->
+  <div class="glass glass-hover rounded-2xl p-5 fade-in">
+    <p class="text-xs text-slate-500 uppercase tracking-wider font-medium mb-3">Active Model</p>
+    <div class="flex items-center gap-2 mb-2">
+      <span class="pulse-dot w-2 h-2 rounded-full bg-green-400 flex-shrink-0"></span>
+      <span class="text-sm font-semibold text-white">Gemini 3.1 Pro</span>
+    </div>
+    <p class="text-xs text-slate-500 mono truncate">google/gemini-3.1-pro-preview</p>
+    <div class="mt-3 pt-3 border-t border-slate-800">
+      <p class="text-xs text-slate-500">Primary delegator</p>
+      <p class="text-xs text-indigo-400 mt-0.5">Claude → workers only</p>
+    </div>
+  </div>
+
+  <!-- Sessions -->
+  <div class="glass glass-hover rounded-2xl p-5 fade-in">
+    <p class="text-xs text-slate-500 uppercase tracking-wider font-medium mb-3">Total Sessions</p>
+    <p class="text-3xl font-bold text-white">72</p>
+    <p class="text-xs text-slate-500 mt-1">All-time across agents</p>
+    <div class="mt-3 pt-3 border-t border-slate-800 flex gap-4">
+      <div>
+        <p class="text-xs text-slate-600">Errors today</p>
+        <p id="errorsToday" class="text-sm font-semibold text-red-400">0</p>
+      </div>
+      <div>
+        <p class="text-xs text-slate-600">Status</p>
+        <p class="text-sm font-semibold text-green-400">Online</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Model roles -->
+  <div class="glass glass-hover rounded-2xl p-5 fade-in">
+    <p class="text-xs text-slate-500 uppercase tracking-wider font-medium mb-3">Model Roles</p>
+    <div class="space-y-2.5">
+      <div class="flex items-center justify-between">
+        <span class="text-xs text-slate-400">Sonnet 4.6</span>
+        <span class="tag bg-orange-500/15 text-orange-400">Coding / Analysis</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-xs text-slate-400">Haiku 4.5</span>
+        <span class="tag bg-indigo-500/15 text-indigo-400">Heartbeat / Light</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-xs text-slate-400">Gemini Flash</span>
+        <span class="tag bg-teal-500/15 text-teal-400">Research / Data</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Charts -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
+
+  <div class="glass rounded-2xl p-5 lg:col-span-2 fade-in">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+      <div>
+        <h2 class="text-sm font-semibold text-white">Model Activity · Last 14 Days</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Call frequency from gateway.log</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <span class="tag bg-orange-500/15 text-orange-400">● Sonnet</span>
+        <span class="tag bg-purple-500/15 text-purple-400">● Opus</span>
+        <span class="tag bg-blue-500/15 text-blue-400">● Haiku</span>
+        <span class="tag bg-teal-500/15 text-teal-400">● Gemini</span>
+      </div>
+    </div>
+    <div style="height:220px"><canvas id="usageChart"></canvas></div>
+  </div>
+
+  <div class="glass rounded-2xl p-5 fade-in">
+    <div class="mb-5">
+      <h2 class="text-sm font-semibold text-white">14-Day Cost Split</h2>
+      <p class="text-xs text-slate-500 mt-0.5">Estimated · published pricing</p>
+    </div>
+    <div style="height:150px" class="flex items-center justify-center">
+      <canvas id="costChart"></canvas>
+    </div>
+    <div id="costLegend" class="mt-4 space-y-2"></div>
+  </div>
+
+</div>
+
+<!-- Bottom: Anthropic + Google + Rate Log -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+  <!-- Anthropic -->
+  <div class="glass rounded-2xl p-5 anthropic-glow fade-in">
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-7 h-7 rounded-lg bg-orange-500/20 flex items-center justify-center">
+        <svg class="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 24 24"><path d="M13.33 4.67L18.67 20h-3.23l-1.04-3.11H9.6L8.56 20H5.33l5.34-15.33h2.66zM12 8.67L10.29 14h3.42L12 8.67z"/></svg>
+      </div>
+      <div>
+        <h2 class="text-sm font-semibold text-white">Anthropic API</h2>
+        <p class="text-xs text-slate-500">api_key mode · estimated costs</p>
+      </div>
+    </div>
+    <div id="anthropicModels" class="space-y-3 min-h-[80px]"></div>
+    <div class="mt-4 pt-4 border-t border-slate-800 flex items-center justify-between">
+      <div>
+        <p class="text-xs text-slate-500">Est. cost today</p>
+        <p id="anthropicCostToday" class="text-xl font-bold text-orange-400">—</p>
+      </div>
+      <div class="text-right">
+        <p class="text-xs text-slate-600">Connect Admin Key</p>
+        <p class="text-xs text-slate-600">for exact figures →</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Google -->
+  <div class="glass rounded-2xl p-5 google-glow fade-in">
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-7 h-7 rounded-lg bg-teal-500/20 flex items-center justify-center">
+        <svg class="w-4 h-4 text-teal-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      </div>
+      <div>
+        <h2 class="text-sm font-semibold text-white">Google AI API</h2>
+        <p class="text-xs text-slate-500">api_key mode</p>
+      </div>
+    </div>
+    <div id="googleModels" class="space-y-3 min-h-[80px]"></div>
+    <div class="mt-4 pt-4 border-t border-slate-800 flex items-center justify-between">
+      <div>
+        <p class="text-xs text-slate-500">Est. cost today</p>
+        <p id="googleCostToday" class="text-xl font-bold text-teal-400">—</p>
+      </div>
+      <div class="text-right">
+        <p class="text-xs text-slate-600">Cheaper by</p>
+        <p id="googleSaving" class="text-xs text-teal-400 font-medium"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rate Limit Log -->
+  <div class="glass rounded-2xl p-5 fade-in">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg bg-red-500/20 flex items-center justify-center">
+          <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <div>
+          <h2 class="text-sm font-semibold text-white">Rate Limit Log</h2>
+          <p id="rlDate" class="text-xs text-slate-500">Recent events</p>
+        </div>
+      </div>
+      <span id="rlBadge" class="tag bg-slate-700 text-slate-400">0 events</span>
+    </div>
+    <div id="rlLog" class="space-y-2 max-h-52 overflow-y-auto scrollbar-thin">
+      <p class="text-xs text-slate-600 italic">No rate limit events 🎉</p>
+    </div>
+    <div class="mt-3 pt-3 border-t border-slate-800">
+      <p class="text-xs text-slate-500">💡 <strong class="text-slate-400">Tip:</strong> Use Gemini Flash or Haiku for bulk worker tasks to avoid Claude rate limits.</p>
+    </div>
+  </div>
+
+</div>
+
+</div><!-- /mainContent -->
+
+<!-- Footer -->
+<div class="mt-6 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-700">
+  <span>MetaVision · Metabot AI Cockpit v1.1 · Auto-refreshes hourly via cron</span>
+  <span>Data source: <span class="mono">gateway.log</span> + <span class="mono">credit-budget.json</span> · Costs estimated</span>
+</div>
+
+<script>
+// ── Colour map ────────────────────────────────────────────────────────────────
+const COLORS = {
+  "Claude Sonnet": { bg:"rgba(251,146,60,0.7)",  border:"#fb923c", dot:"bg-orange-400" },
+  "Claude Opus":   { bg:"rgba(192,132,252,0.7)", border:"#c084fc", dot:"bg-purple-400" },
+  "Claude Haiku":  { bg:"rgba(96,165,250,0.7)",  border:"#60a5fa", dot:"bg-blue-400"   },
+  "Gemini Pro":    { bg:"rgba(45,212,191,0.7)",  border:"#2dd4bf", dot:"bg-teal-400"   },
+  "Gemini Flash":  { bg:"rgba(134,239,172,0.7)", border:"#86efac", dot:"bg-green-400"  },
+  "Other":         { bg:"rgba(148,163,184,0.7)", border:"#94a3b8", dot:"bg-slate-400"  },
+};
+
+let usageChartInst = null;
+let costChartInst  = null;
+
+Chart.defaults.color        = '#64748b';
+Chart.defaults.font.family  = 'Inter, sans-serif';
+Chart.defaults.font.size    = 11;
+
+function fmt$(n){ return n < 0.001 ? '<$0.001' : n < 0.01 ? `$${n.toFixed(4)}` : `$${n.toFixed(3)}`; }
+function fmtDate(iso){ const d=new Date(iso); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+' CET'; }
+
+async function loadData(){
+  document.getElementById('lastUpdated').textContent = 'Refreshing...';
+  try {
+    const r = await fetch('usage-data.json?t='+Date.now());
+    if(!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    render(d);
+  } catch(e){
+    document.getElementById('lastUpdated').textContent = '⚠ Could not load data';
+    console.error(e);
+  }
+}
+
+function render(d){
+  document.getElementById('loadingState').classList.add('hidden');
+  document.getElementById('mainContent').classList.remove('hidden');
+
+  // Timestamp
+  document.getElementById('lastUpdated').textContent = 'Updated ' + fmtDate(d.generated_at);
+
+  // Budget
+  const bal  = d.budget?.balance ?? 0;
+  const lim  = d.budget?.limit   ?? 10;
+  const pct  = Math.round((bal/lim)*100);
+  const setAt= d.budget?.set_at ? new Date(d.budget.set_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) : '';
+  document.getElementById('budgetVal').textContent  = `$${bal.toFixed(2)}`;
+  document.getElementById('budgetDate').textContent = `Set ${setAt} · Top-up anytime`;
+  document.getElementById('budgetBar').style.width  = pct+'%';
+  document.getElementById('budgetPct').textContent  = `${pct}% remaining`;
+
+  // Errors today
+  const errCount = d.errors_today || 0;
+  document.getElementById('errorsToday').textContent = errCount;
+  document.getElementById('errorsToday').className   = errCount > 0 ? 'text-sm font-semibold text-red-400' : 'text-sm font-semibold text-green-400';
+
+  // Rate limit banner
+  if(errCount > 0){
+    const times = (d.rate_events||[]).filter(e=>e.date===new Date().toISOString().slice(0,10)).map(e=>e.time);
+    document.getElementById('rateLimitBanner').classList.remove('hidden');
+    document.getElementById('rlCount').textContent   = `${errCount} events`;
+    document.getElementById('rlSummary').textContent = times.length ? `Events at: ${times.slice(0,5).join(', ')} — All Claude fallbacks exhausted. Gemini now active as primary.` : 'Claude API rate limits hit. Gemini now primary model.';
+  }
+
+  // Charts
+  buildUsageChart(d.chart);
+  buildCostChart(d.cost_split);
+
+  // Today's Anthropic models
+  const anthModels = (d.today_models||[]).filter(m=>m.provider==='anthropic').slice(0,4);
+  const googModels = (d.today_models||[]).filter(m=>m.provider==='google').slice(0,4);
+  renderModelBars('anthropicModels', anthModels, 'orange');
+  renderModelBars('googleModels',    googModels, 'teal');
+
+  // Cost totals today
+  const anthCost = anthModels.reduce((s,m)=>s+m.est_cost,0);
+  const googCost = googModels.reduce((s,m)=>s+m.est_cost,0);
+  document.getElementById('anthropicCostToday').textContent = anthCost > 0 ? `~${fmt$(anthCost)}` : '~$0';
+  document.getElementById('googleCostToday').textContent    = googCost > 0 ? `~${fmt$(googCost)}` : '~$0';
+  if(anthCost > 0 && googCost < anthCost){
+    const pct = Math.round((1-(googCost/anthCost))*100);
+    document.getElementById('googleSaving').textContent = `~${pct}% vs Claude`;
+  }
+
+  // Rate limit log
+  const events = (d.rate_events||[]).slice(-10).reverse();
+  document.getElementById('rlBadge').textContent = `${events.length} events`;
+  document.getElementById('rlBadge').className   = events.length > 0 ? 'tag bg-red-500/20 text-red-400' : 'tag bg-slate-700 text-slate-400';
+  if(events.length > 0){
+    document.getElementById('rlDate').textContent = 'Recent events';
+    document.getElementById('rlLog').innerHTML = events.map(e=>`
+      <div class="flex items-start gap-2 p-2.5 rounded-lg bg-red-500/5 border border-red-500/10">
+        <span class="mono text-xs text-red-400 whitespace-nowrap">${e.date} ${e.time}</span>
+        <span class="text-xs text-slate-400 truncate">All models rate limited</span>
+      </div>`).join('');
+  }
+}
+
+function renderModelBars(containerId, models, accent){
+  const el = document.getElementById(containerId);
+  if(!models.length){ el.innerHTML = '<p class="text-xs text-slate-600 italic">No calls today</p>'; return; }
+  const maxCalls = Math.max(...models.map(m=>m.calls));
+  const colors   = { orange:'text-orange-300 bg-orange-400', teal:'text-teal-300 bg-teal-400' };
+  el.innerHTML = models.map(m=>{
+    const shortName = m.model.split('/')[1].replace(/-20\d+|latest/g,'').slice(0,22);
+    const pct = Math.round((m.calls/maxCalls)*100);
+    const [tc,bc] = colors[accent].split(' ');
+    return `<div>
+      <div class="flex justify-between text-xs mb-1">
+        <span class="text-slate-400 truncate mr-2">${shortName}</span>
+        <span class="${tc} font-medium mono whitespace-nowrap">${m.calls} calls</span>
+      </div>
+      <div class="w-full bg-slate-800 rounded-full h-1">
+        <div class="${bc} h-1 rounded-full bar-fill" style="width:${pct}%"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function buildUsageChart(chart){
+  if(!chart) return;
+  if(usageChartInst){ usageChartInst.destroy(); }
+  const ctx = document.getElementById('usageChart').getContext('2d');
+  usageChartInst = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: chart.labels,
+      datasets:[
+        {label:'Sonnet', data:chart.sonnet,       backgroundColor:'rgba(251,146,60,.7)',  borderColor:'#fb923c', borderWidth:1, borderRadius:3},
+        {label:'Opus',   data:chart.opus,         backgroundColor:'rgba(192,132,252,.7)', borderColor:'#c084fc', borderWidth:1, borderRadius:3},
+        {label:'Haiku',  data:chart.haiku,        backgroundColor:'rgba(96,165,250,.7)',  borderColor:'#60a5fa', borderWidth:1, borderRadius:3},
+        {label:'Gemini', data:chart.gemini_pro.map((v,i)=>v+(chart.gemini_flash||[])[i]||v), backgroundColor:'rgba(45,212,191,.7)', borderColor:'#2dd4bf', borderWidth:1, borderRadius:3},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{backgroundColor:'#1e2130',titleColor:'#e2e8f0',bodyColor:'#94a3b8',borderColor:'rgba(255,255,255,.1)',borderWidth:1} },
+      scales:{
+        x:{ stacked:true, grid:{color:'rgba(255,255,255,.04)'}, ticks:{maxRotation:0,font:{size:10}} },
+        y:{ stacked:true, grid:{color:'rgba(255,255,255,.04)'}, ticks:{stepSize:5} }
+      }
+    }
+  });
+}
+
+function buildCostChart(costSplit){
+  if(!costSplit) return;
+  if(costChartInst){ costChartInst.destroy(); }
+  const entries = Object.entries(costSplit).filter(([,v])=>v>0).sort(([,a],[,b])=>b-a);
+  if(!entries.length) return;
+  const labels = entries.map(([k])=>k);
+  const values = entries.map(([,v])=>parseFloat(v.toFixed(4)));
+  const colorArr = labels.map(l=>COLORS[l]?.bg||'rgba(148,163,184,.7)');
+  const borderArr= labels.map(l=>COLORS[l]?.border||'#94a3b8');
+
+  const ctx = document.getElementById('costChart').getContext('2d');
+  costChartInst = new Chart(ctx,{
+    type:'doughnut',
+    data:{ labels, datasets:[{data:values, backgroundColor:colorArr, borderColor:borderArr, borderWidth:1.5, hoverOffset:4}] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'72%',
+      plugins:{legend:{display:false}, tooltip:{backgroundColor:'#1e2130',titleColor:'#e2e8f0',bodyColor:'#94a3b8',borderColor:'rgba(255,255,255,.1)',borderWidth:1,
+        callbacks:{label:(c)=>` ${c.label}: $${c.parsed.toFixed(4)}`}}} }
+  });
+
+  // Legend
+  const total = values.reduce((s,v)=>s+v,0);
+  document.getElementById('costLegend').innerHTML = entries.map(([lbl,val])=>{
+    const dot = COLORS[lbl]?.dot||'bg-slate-400';
+    const pct = total>0 ? Math.round((val/total)*100) : 0;
+    return `<div class="flex items-center justify-between">
+      <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full ${dot}"></span><span class="text-xs text-slate-400">${lbl}</span></div>
+      <span class="text-xs font-medium text-white mono">$${val.toFixed(4)} <span class="text-slate-600">(${pct}%)</span></span>
+    </div>`;
+  }).join('');
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+loadData();
+setInterval(loadData, 5 * 60 * 1000); // auto-refresh every 5 min
+</script>
+</body>
+</html>
