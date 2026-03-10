@@ -98,12 +98,12 @@ if LOG_PATH.exists():
                     })
 
 # ── Budget ───────────────────────────────────────────────────────────────────
-budget = {"balance": None, "set_at": None, "limit": 10.0}
+budget = {"spend_cap": None, "set_at": None}
 if BUDGET_PATH.exists():
     with open(BUDGET_PATH) as f:
         b = json.load(f)
-        budget["balance"] = b.get("balance")
-        budget["set_at"]  = b.get("setAt")
+        budget["spend_cap"] = b.get("balance")   # "balance" = configured cap, not remaining
+        budget["set_at"]    = b.get("setAt")
 
 # ── Build per-day chart data (last 14 days) ──────────────────────────────────
 from datetime import timedelta

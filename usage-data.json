@@ -1,9 +1,8 @@
 {
-  "generated_at": "2026-03-10T10:45:32.113123+00:00",
+  "generated_at": "2026-03-10T10:49:23.264034+00:00",
   "budget": {
-    "balance": 6.77,
-    "set_at": "2026-03-05T14:58:28.813Z",
-    "limit": 10.0
+    "spend_cap": 6.77,
+    "set_at": "2026-03-05T14:58:28.813Z"
   },
   "errors_today": 8,
   "rate_events": [
