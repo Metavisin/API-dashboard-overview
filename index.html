@@ -6,6 +6,7 @@
 <title>MetaVision · AI Usage Cockpit</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
   * { box-sizing: border-box; }
@@ -252,6 +253,41 @@
 
 </div><!-- /mainContent -->
 
+<!-- Live Pipeline -->
+<div class="glass rounded-2xl p-5 mt-5 fade-in">
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+        <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <div>
+        <h2 class="text-sm font-semibold text-white">Live Agent Pipeline</h2>
+        <p class="text-xs text-slate-500">Real-time · events stream from the Mac mini as they happen</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <span id="pipelineStatus" class="flex items-center gap-1.5 text-xs text-slate-500">
+        <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span> Connecting...
+      </span>
+    </div>
+  </div>
+
+  <!-- Event legend -->
+  <div class="flex flex-wrap gap-3 mb-4">
+    <span class="tag bg-green-500/15 text-green-400">● model_selected</span>
+    <span class="tag bg-indigo-500/15 text-indigo-400">● subagent_spawned</span>
+    <span class="tag bg-teal-500/15 text-teal-400">● subagent_complete</span>
+    <span class="tag bg-red-500/15 text-red-400">● rate_limit</span>
+    <span class="tag bg-orange-500/15 text-orange-400">● model_fallback</span>
+    <span class="tag bg-slate-600 text-slate-400">● config_reload</span>
+  </div>
+
+  <!-- Live feed -->
+  <div id="pipelineFeed" class="space-y-1.5 max-h-72 overflow-y-auto scrollbar-thin font-mono text-xs">
+    <div class="text-slate-600 italic text-center py-6">Waiting for events from the Mac mini...</div>
+  </div>
+</div>
+
 <!-- Footer -->
 <div class="mt-6 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-700">
   <span>MetaVision · Metabot AI Cockpit v1.1 · Auto-refreshes hourly via cron</span>
@@ -431,9 +467,85 @@ function buildCostChart(costSplit){
   }).join('');
 }
 
+// ── Live Pipeline (Supabase Realtime) ────────────────────────────────────────
+
+const SUPABASE_URL = 'https://pxwlwtlowvhytiyepjzk.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_c7zkCkMIifUa3DNS4UfLeA_DNP9Uill';
+
+const EVENT_STYLES = {
+  model_selected:   { dot: 'bg-green-400',   label: 'text-green-400',   icon: '🤖' },
+  subagent_spawned: { dot: 'bg-indigo-400',  label: 'text-indigo-400',  icon: '🚀' },
+  subagent_complete:{ dot: 'bg-teal-400',    label: 'text-teal-400',    icon: '✅' },
+  rate_limit:       { dot: 'bg-red-400',     label: 'text-red-400',     icon: '⚠️' },
+  model_fallback:   { dot: 'bg-orange-400',  label: 'text-orange-400',  icon: '↩️' },
+  config_reload:    { dot: 'bg-slate-400',   label: 'text-slate-400',   icon: '⚙️' },
+};
+
+function renderEvent(ev) {
+  const style  = EVENT_STYLES[ev.event_type] || { dot:'bg-slate-500', label:'text-slate-400', icon:'•' };
+  const ts     = new Date(ev.created_at).toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  const model  = ev.model ? `<span class="text-slate-500 ml-2">${ev.model.split('/')[1] || ev.model}</span>` : '';
+  return `<div class="flex items-start gap-2 px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800/50 hover:border-slate-700 transition-colors">
+    <span class="text-slate-600 whitespace-nowrap mt-0.5">${ts}</span>
+    <span class="${style.label} whitespace-nowrap">${ev.event_type}</span>
+    <span class="text-slate-300 flex-1">${ev.message || ''}${model}</span>
+  </div>`;
+}
+
+async function loadRecentEvents() {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/pipeline_events?order=created_at.desc&limit=40`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    const events = await r.json();
+    if (Array.isArray(events) && events.length > 0) {
+      const feed = document.getElementById('pipelineFeed');
+      feed.innerHTML = events.map(renderEvent).join('');
+    }
+  } catch(e) { console.error('Pipeline load error', e); }
+}
+
+function prependEvent(ev) {
+  const feed = document.getElementById('pipelineFeed');
+  // Remove placeholder
+  const placeholder = feed.querySelector('.italic');
+  if (placeholder) placeholder.remove();
+  // Prepend new event
+  const div = document.createElement('div');
+  div.innerHTML = renderEvent(ev);
+  div.firstChild.classList.add('fade-in');
+  feed.prepend(div.firstChild);
+  // Keep max 50 events in DOM
+  while (feed.children.length > 50) feed.removeChild(feed.lastChild);
+}
+
+function initPipeline() {
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // Load recent history first
+  loadRecentEvents();
+
+  // Subscribe to new inserts
+  sb.channel('pipeline')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pipeline_events' }, payload => {
+      prependEvent(payload.new);
+    })
+    .subscribe(status => {
+      const el = document.getElementById('pipelineStatus');
+      if (status === 'SUBSCRIBED') {
+        el.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-green-400 pulse-dot"></span> Live';
+        el.className  = 'flex items-center gap-1.5 text-xs text-green-400';
+      } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+        el.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-red-400"></span> Disconnected';
+        el.className  = 'flex items-center gap-1.5 text-xs text-red-400';
+      }
+    });
+}
+
 // ── Boot ──────────────────────────────────────────────────────────────────────
 loadData();
 setInterval(loadData, 5 * 60 * 1000); // auto-refresh every 5 min
+initPipeline();
 </script>
 </body>
 </html>
