@@ -370,19 +370,41 @@ function render(d){
   buildUsageChart(d.chart);
   buildCostChart(d.cost_split);
 
-  // Today's Anthropic models
-  const anthModels = (d.today_models||[]).filter(m=>m.provider==='anthropic').slice(0,4);
-  const googModels = (d.today_models||[]).filter(m=>m.provider==='google').slice(0,4);
-  renderModelBars('anthropicModels', anthModels, 'orange');
-  renderModelBars('googleModels',    googModels, 'teal');
+  // Anthropic real data (from Admin API) or fallback to estimated
+  const realData = d.anthropic_real;
+  const isReal   = realData?.source === 'anthropic_api';
 
-  // Cost totals today
-  const anthCost = anthModels.reduce((s,m)=>s+m.est_cost,0);
+  if (isReal && realData.today?.length > 0) {
+    // Real token data
+    const realModels = realData.today.map(m => ({
+      model:    'anthropic/' + m.model,
+      calls:    m.input_tokens + m.output_tokens,
+      provider: 'anthropic',
+      family:   m.model,
+      est_cost: m.cost,
+      tokens:   { in: m.input_tokens, out: m.output_tokens, cache: m.cache_read },
+    })).sort((a,b) => b.est_cost - a.est_cost);
+    renderModelBarsReal('anthropicModels', realModels, 'orange');
+    const anthCost = realModels.reduce((s,m)=>s+m.est_cost,0);
+    document.getElementById('anthropicCostToday').textContent = `$${anthCost.toFixed(4)}`;
+    document.querySelector('#anthropicModels').closest('.glass').querySelector('.text-slate-500.text-xs').textContent = 'OAuth primary · real token data ✓';
+  } else {
+    const anthModels = (d.today_models||[]).filter(m=>m.provider==='anthropic').slice(0,4);
+    renderModelBars('anthropicModels', anthModels, 'orange');
+    const anthCost = anthModels.reduce((s,m)=>s+m.est_cost,0);
+    document.getElementById('anthropicCostToday').textContent = anthCost > 0 ? `~${fmt$(anthCost)}` : '~$0';
+  }
+
+  const googModels = (d.today_models||[]).filter(m=>m.provider==='google').slice(0,4);
+  renderModelBars('googleModels', googModels, 'teal');
   const googCost = googModels.reduce((s,m)=>s+m.est_cost,0);
-  document.getElementById('anthropicCostToday').textContent = anthCost > 0 ? `~${fmt$(anthCost)}` : '~$0';
-  document.getElementById('googleCostToday').textContent    = googCost > 0 ? `~${fmt$(googCost)}` : '~$0';
-  if(anthCost > 0 && googCost < anthCost){
-    const pct = Math.round((1-(googCost/anthCost))*100);
+  document.getElementById('googleCostToday').textContent = googCost > 0 ? `~${fmt$(googCost)}` : '~$0';
+
+  const anthCostFinal = isReal && realData.today?.length
+    ? realData.today.reduce((s,m)=>s+m.cost,0)
+    : (d.today_models||[]).filter(m=>m.provider==='anthropic').reduce((s,m)=>s+m.est_cost,0);
+  if(anthCostFinal > 0 && googCost < anthCostFinal){
+    const pct = Math.round((1-(googCost/anthCostFinal))*100);
     document.getElementById('googleSaving').textContent = `~${pct}% vs Claude`;
   }
 
@@ -398,6 +420,29 @@ function render(d){
         <span class="text-xs text-slate-400 truncate">All models rate limited</span>
       </div>`).join('');
   }
+}
+
+function renderModelBarsReal(containerId, models, accent) {
+  const el = document.getElementById(containerId);
+  if (!models.length) { el.innerHTML = '<p class="text-xs text-slate-600 italic">No calls today</p>'; return; }
+  const maxCost = Math.max(...models.map(m => m.est_cost));
+  const colors  = { orange: 'text-orange-300 bg-orange-400', teal: 'text-teal-300 bg-teal-400' };
+  el.innerHTML = models.map(m => {
+    const shortName = (m.model.split('/')[1] || m.model).replace(/-20\d+/g, '').slice(0, 24);
+    const pct = maxCost > 0 ? Math.round((m.est_cost / maxCost) * 100) : 0;
+    const [tc, bc] = colors[accent].split(' ');
+    const tok = m.tokens ? `${(m.tokens.in/1000).toFixed(0)}k in / ${(m.tokens.out/1000).toFixed(0)}k out` : '';
+    return `<div>
+      <div class="flex justify-between text-xs mb-1">
+        <span class="text-slate-400 truncate mr-2">${shortName}</span>
+        <span class="${tc} font-medium mono whitespace-nowrap">$${m.est_cost.toFixed(4)}</span>
+      </div>
+      ${tok ? `<p class="text-slate-600 text-xs mb-1">${tok}${m.tokens?.cache ? ` · ${(m.tokens.cache/1000).toFixed(0)}k cached` : ''}</p>` : ''}
+      <div class="w-full bg-slate-800 rounded-full h-1">
+        <div class="${bc} h-1 rounded-full bar-fill" style="width:${pct}%"></div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function renderModelBars(containerId, models, accent){

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-10T13:59:09.964842+00:00",
+  "generated_at": "2026-03-10T14:57:22.050895+00:00",
   "budget": {
     "spend_cap": 6.77,
     "set_at": "2026-03-05T14:58:28.813Z"
@@ -78,7 +78,7 @@
       0,
       0,
       20,
-      26
+      27
     ],
     "opus": [
       2,
@@ -148,10 +148,10 @@
   "today_models": [
     {
       "model": "anthropic/claude-sonnet-4-6",
-      "calls": 18,
+      "calls": 19,
       "provider": "anthropic",
       "family": "Claude Sonnet",
-      "est_cost": 324.0
+      "est_cost": 342.0
     },
     {
       "model": "anthropic/claude-opus-4-6",
@@ -233,10 +233,112 @@
   ],
   "cost_split": {
     "Claude Opus": 4460.0,
-    "Claude Sonnet": 1798.0,
+    "Claude Sonnet": 1816.0,
     "Claude Haiku": 255.60000000000002,
     "Gemini Pro": 52.0,
     "Gemini Flash": 30.8
   },
-  "total_sessions": 72
+  "total_sessions": 72,
+  "anthropic_real": {
+    "today": [
+      {
+        "model": "claude-haiku-4-5-20251001",
+        "input_tokens": 264,
+        "output_tokens": 19635,
+        "cache_read": 1403164,
+        "cost": 0.411204
+      },
+      {
+        "model": "claude-sonnet-4-6",
+        "input_tokens": 825,
+        "output_tokens": 275244,
+        "cache_read": 39029228,
+        "cost": 45.688467
+      }
+    ],
+    "by_day": {
+      "2026-03-05": [
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3593,
+          "output_tokens": 170520,
+          "cache_read": 17747677,
+          "cost": 4.278875
+        },
+        {
+          "model": "claude-opus-4-6",
+          "input_tokens": 168,
+          "output_tokens": 20129,
+          "cache_read": 8042940,
+          "cost": 37.940149
+        },
+        {
+          "model": "claude-sonnet-4-6",
+          "input_tokens": 347,
+          "output_tokens": 126170,
+          "cache_read": 12355246,
+          "cost": 9.458229
+        }
+      ],
+      "2026-03-06": [
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 1125,
+          "output_tokens": 19410,
+          "cache_read": 1518454,
+          "cost": 0.910652
+        },
+        {
+          "model": "claude-sonnet-4-6",
+          "input_tokens": 101,
+          "output_tokens": 7960,
+          "cache_read": 742587,
+          "cost": 1.841095
+        }
+      ],
+      "2026-03-07": [
+        {
+          "model": "claude-sonnet-4-6",
+          "input_tokens": 244,
+          "output_tokens": 16828,
+          "cache_read": 1813132,
+          "cost": 4.423319
+        }
+      ],
+      "2026-03-08": [
+        {
+          "model": "claude-sonnet-4-6",
+          "input_tokens": 250,
+          "output_tokens": 21361,
+          "cache_read": 1940347,
+          "cost": 4.582323
+        }
+      ],
+      "2026-03-09": [
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 264,
+          "output_tokens": 19635,
+          "cache_read": 1403164,
+          "cost": 0.411204
+        },
+        {
+          "model": "claude-sonnet-4-6",
+          "input_tokens": 825,
+          "output_tokens": 275244,
+          "cache_read": 39029228,
+          "cost": 45.688467
+        }
+      ]
+    },
+    "source": "anthropic_api",
+    "latest_day": "2026-03-09",
+    "total_cost": {
+      "2026-03-05": 51.6773,
+      "2026-03-06": 2.7517,
+      "2026-03-07": 4.4233,
+      "2026-03-08": 4.5823,
+      "2026-03-09": 46.0997
+    }
+  }
 }
