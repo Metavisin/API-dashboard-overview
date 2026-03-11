@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-11T10:00:29.329675+00:00",
+  "generated_at": "2026-03-11T11:00:34.370648+00:00",
   "budget": {
     "spend_cap": 6.77,
     "set_at": "2026-03-05T14:58:28.813Z"
@@ -101,7 +101,7 @@
       0,
       0,
       10,
-      0
+      1
     ]
   },
   "today_models": [
@@ -118,6 +118,13 @@
       "provider": "anthropic",
       "family": "Claude Sonnet",
       "est_cost": 18.0
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "calls": 1,
+      "provider": "google",
+      "family": "Gemini Flash",
+      "est_cost": 10.0
     }
   ],
   "cost_split": {
@@ -125,7 +132,7 @@
     "Claude Opus": 4740.0,
     "Claude Haiku": 290.4,
     "Gemini Pro": 86.0,
-    "Gemini Flash": 61.6
+    "Gemini Flash": 71.6
   },
   "total_sessions": 72,
   "anthropic_real": {
