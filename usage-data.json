@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-11T14:00:47.674166+00:00",
+  "generated_at": "2026-03-11T15:00:51.916420+00:00",
   "budget": {
     "spend_cap": 6.77,
     "set_at": "2026-03-05T14:58:28.813Z"
@@ -85,7 +85,7 @@
       0,
       0,
       11,
-      7
+      8
     ],
     "gemini_flash": [
       0,
@@ -101,23 +101,23 @@
       0,
       0,
       10,
-      7
+      8
     ]
   },
   "today_models": [
     {
       "model": "google/gemini-3.1-pro-preview",
-      "calls": 7,
+      "calls": 8,
       "provider": "google",
       "family": "Gemini Pro",
-      "est_cost": 42.0
+      "est_cost": 48.0
     },
     {
       "model": "google/gemini-3-flash-preview",
-      "calls": 7,
+      "calls": 8,
       "provider": "google",
       "family": "Gemini Flash",
-      "est_cost": 70.0
+      "est_cost": 80.0
     },
     {
       "model": "anthropic/claude-sonnet-4-6",
@@ -131,8 +131,8 @@
     "Claude Sonnet": 1956.0,
     "Claude Opus": 4740.0,
     "Claude Haiku": 290.4,
-    "Gemini Pro": 116.0,
-    "Gemini Flash": 131.60000000000002
+    "Gemini Pro": 122.0,
+    "Gemini Flash": 141.6
   },
   "total_sessions": 72,
   "anthropic_real": {
