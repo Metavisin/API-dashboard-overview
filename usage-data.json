@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-11T07:00:16.803625+00:00",
+  "generated_at": "2026-03-11T08:00:20.710056+00:00",
   "budget": {
     "spend_cap": 6.77,
     "set_at": "2026-03-05T14:58:28.813Z"
@@ -37,7 +37,7 @@
       0,
       20,
       36,
-      0
+      1
     ],
     "opus": [
       0,
@@ -104,9 +104,17 @@
       0
     ]
   },
-  "today_models": [],
+  "today_models": [
+    {
+      "model": "anthropic/claude-sonnet-4-6",
+      "calls": 1,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 18.0
+    }
+  ],
   "cost_split": {
-    "Claude Sonnet": 1938.0,
+    "Claude Sonnet": 1956.0,
     "Claude Opus": 4740.0,
     "Claude Haiku": 290.4,
     "Gemini Pro": 74.0,
