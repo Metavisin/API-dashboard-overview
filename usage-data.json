@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-11T22:01:25.808970+00:00",
+  "generated_at": "2026-03-11T23:01:30.351255+00:00",
   "budget": {
     "spend_cap": 6.77,
     "set_at": "2026-03-05T14:58:28.813Z"
@@ -8,7 +8,6 @@
   "rate_events": [],
   "chart": {
     "labels": [
-      "02-26",
       "02-27",
       "02-28",
       "03-01",
@@ -21,10 +20,10 @@
       "03-08",
       "03-09",
       "03-10",
-      "03-11"
+      "03-11",
+      "03-12"
     ],
     "sonnet": [
-      0,
       0,
       0,
       0,
@@ -37,10 +36,10 @@
       0,
       20,
       36,
-      1
+      1,
+      0
     ],
     "opus": [
-      0,
       0,
       0,
       0,
@@ -53,10 +52,10 @@
       0,
       6,
       28,
+      0,
       0
     ],
     "haiku": [
-      0,
       0,
       0,
       0,
@@ -69,6 +68,7 @@
       0,
       4,
       24,
+      0,
       0
     ],
     "gemini_pro": [
@@ -83,9 +83,9 @@
       0,
       0,
       0,
-      0,
       11,
-      8
+      8,
+      0
     ],
     "gemini_flash": [
       0,
@@ -99,34 +99,12 @@
       0,
       0,
       0,
-      0,
       10,
-      10
+      10,
+      0
     ]
   },
-  "today_models": [
-    {
-      "model": "google/gemini-3-flash-preview",
-      "calls": 10,
-      "provider": "google",
-      "family": "Gemini Flash",
-      "est_cost": 100.0
-    },
-    {
-      "model": "google/gemini-3.1-pro-preview",
-      "calls": 8,
-      "provider": "google",
-      "family": "Gemini Pro",
-      "est_cost": 48.0
-    },
-    {
-      "model": "anthropic/claude-sonnet-4-6",
-      "calls": 1,
-      "provider": "anthropic",
-      "family": "Claude Sonnet",
-      "est_cost": 18.0
-    }
-  ],
+  "today_models": [],
   "cost_split": {
     "Claude Sonnet": 1956.0,
     "Claude Opus": 4740.0,
@@ -153,29 +131,6 @@
       }
     ],
     "by_day": {
-      "2026-03-05": [
-        {
-          "model": "claude-haiku-4-5-20251001",
-          "input_tokens": 3593,
-          "output_tokens": 170520,
-          "cache_read": 17747677,
-          "cost": 4.278875
-        },
-        {
-          "model": "claude-opus-4-6",
-          "input_tokens": 168,
-          "output_tokens": 20129,
-          "cache_read": 8042940,
-          "cost": 37.940149
-        },
-        {
-          "model": "claude-sonnet-4-6",
-          "input_tokens": 347,
-          "output_tokens": 126170,
-          "cache_read": 12355246,
-          "cost": 9.458229
-        }
-      ],
       "2026-03-06": [
         {
           "model": "claude-haiku-4-5-20251001",
@@ -246,7 +201,6 @@
     "source": "anthropic_api",
     "latest_day": "2026-03-10",
     "total_cost": {
-      "2026-03-05": 51.6773,
       "2026-03-06": 2.7517,
       "2026-03-07": 4.4233,
       "2026-03-08": 4.5823,
