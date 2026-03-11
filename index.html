@@ -568,48 +568,7 @@ function costForModel(model) {
 async function loadTotalSpend() {
   try {
     const r = await fetch(
-      `${SUPABASE_URL}/rest/v1/pipeline_events?select=model,metadata`,
-      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
-    );
-    const events = await r.json();
-    if (!Array.isArray(events)) return;
-
-    let total = 0;
-    const modelSpend = {};
-    const modelEvents = {};
-
-    events.forEach(e => {
-      const cost = parseFloat(e.metadata?.cost_estimate) || 0;
-      total += cost;
-      const m = e.model || 'unknown';
-      modelSpend[m] = (modelSpend[m] || 0) + cost;
-      modelEvents[m] = (modelEvents[m] || 0) + 1;
-    });
-
-    document.getElementById('totalPipelineSpendLabel').textContent = total > 0 ? `$${total.toFixed(4)}` : '$0.00';
-    
-    const sortedModels = Object.entries(modelSpend).sort((a, b) => b[1] - a[1]);
-    const breakdownHtml = sortedModels.map(([m, c]) => {
-      if (c === 0 && modelEvents[m] === 0) return '';
-      let color = 'text-slate-300';
-      if (m.includes('claude')) color = 'text-orange-300';
-      if (m.includes('gemini')) color = 'text-teal-300';
-      return `<div class="flex justify-between items-center text-xs">
-        <span class="text-slate-400 flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full ${color.replace('text', 'bg')}"></span>${m.split('/').pop()} <span class="text-slate-600">(${modelEvents[m]} events)</span></span>
-        <span class="${color} mono">$${c.toFixed(4)}</span>
-      </div>`;
-    }).join('');
-
-    document.getElementById('totalPipelineSpendBreakdown').innerHTML = breakdownHtml || '<p class="text-xs text-slate-600 italic">No events found.</p>';
-  } catch(e) {
-    console.error('Total spend load error', e);
-  }
-}
-
-async function loadTotalSpend() {
-  try {
-    const r = await fetch(
-      `${SUPABASE_URL}/rest/v1/pipeline_events?select=model,metadata`,
+      `${SUPABASE_URL}/rest/v1/pipeline_events?message=not.ilike.*[TEST]*&select=model,metadata`,
       { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
     );
     const events = await r.json();
@@ -653,7 +612,7 @@ async function loadTodaySpend() {
   const today = new Date().toISOString().slice(0, 10);
   try {
     const r = await fetch(
-      `${SUPABASE_URL}/rest/v1/pipeline_events?created_at=gte.${today}T00:00:00Z&select=model,metadata,event_type`,
+      `${SUPABASE_URL}/rest/v1/pipeline_events?message=not.ilike.*[TEST]*&created_at=gte.${today}T00:00:00Z&select=model,metadata,event_type`,
       { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
     );
     const events = await r.json();
@@ -735,7 +694,7 @@ function renderEvent(ev) {
 
 async function loadRecentEvents() {
   try {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/pipeline_events?order=created_at.desc&limit=40`, {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/pipeline_events?message=not.ilike.*[TEST]*&order=created_at.desc&limit=40`, {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
     });
     const events = await r.json();
@@ -786,7 +745,6 @@ function initPipeline() {
 // ── Boot ──────────────────────────────────────────────────────────────────────
 loadData();
 loadTodaySpend();
-loadTotalSpend();
 loadTotalSpend();
 setInterval(loadData, 5 * 60 * 1000);
 setInterval(loadTodaySpend, 60 * 1000);
