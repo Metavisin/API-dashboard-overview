@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-16T22:38:54.569441+00:00",
+  "generated_at": "2026-03-16T23:38:59.041487+00:00",
   "budget": {
     "spend_cap": 6.77,
     "set_at": "2026-03-05T14:58:28.813Z"
@@ -8,7 +8,6 @@
   "rate_events": [],
   "chart": {
     "labels": [
-      "03-03",
       "03-04",
       "03-05",
       "03-06",
@@ -21,10 +20,10 @@
       "03-13",
       "03-14",
       "03-15",
-      "03-16"
+      "03-16",
+      "03-17"
     ],
     "sonnet": [
-      0,
       1,
       64,
       0,
@@ -37,10 +36,10 @@
       0,
       0,
       0,
+      0,
       0
     ],
     "opus": [
-      0,
       1,
       23,
       0,
@@ -53,10 +52,10 @@
       0,
       0,
       0,
+      0,
       0
     ],
     "haiku": [
-      0,
       0,
       13,
       0,
@@ -64,6 +63,7 @@
       0,
       4,
       24,
+      0,
       0,
       0,
       0,
@@ -78,9 +78,9 @@
       0,
       0,
       0,
-      0,
       11,
       8,
+      0,
       0,
       0,
       0,
@@ -94,9 +94,9 @@
       0,
       0,
       0,
+      10,
+      10,
       0,
-      10,
-      10,
       0,
       0,
       0,
@@ -114,44 +114,8 @@
   },
   "total_sessions": 72,
   "anthropic_real": {
-    "today": [
-      {
-        "model": "claude-haiku-4-5-20251001",
-        "input_tokens": 10,
-        "output_tokens": 52,
-        "cache_read": 0,
-        "cost": 0.015625
-      },
-      {
-        "model": "claude-sonnet-4-6",
-        "input_tokens": 283,
-        "output_tokens": 113393,
-        "cache_read": 23807708,
-        "cost": 21.026291
-      }
-    ],
-    "by_day": {
-      "2026-03-10": [
-        {
-          "model": "claude-haiku-4-5-20251001",
-          "input_tokens": 10,
-          "output_tokens": 52,
-          "cache_read": 0,
-          "cost": 0.015625
-        },
-        {
-          "model": "claude-sonnet-4-6",
-          "input_tokens": 283,
-          "output_tokens": 113393,
-          "cache_read": 23807708,
-          "cost": 21.026291
-        }
-      ]
-    },
-    "source": "anthropic_api",
-    "latest_day": "2026-03-10",
-    "total_cost": {
-      "2026-03-10": 21.0419
-    }
+    "today": [],
+    "by_day": {},
+    "source": "anthropic_api"
   }
 }
