@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-18T22:42:34.834272+00:00",
+  "generated_at": "2026-03-18T23:42:47.771797+00:00",
   "budget": {
     "spend_cap": 6.77,
     "set_at": "2026-03-05T14:58:28.813Z"
@@ -8,7 +8,6 @@
   "rate_events": [],
   "chart": {
     "labels": [
-      "03-05",
       "03-06",
       "03-07",
       "03-08",
@@ -21,10 +20,10 @@
       "03-15",
       "03-16",
       "03-17",
-      "03-18"
+      "03-18",
+      "03-19"
     ],
     "sonnet": [
-      64,
       0,
       0,
       0,
@@ -37,10 +36,10 @@
       0,
       0,
       0,
+      0,
       0
     ],
     "opus": [
-      23,
       0,
       0,
       0,
@@ -53,15 +52,16 @@
       0,
       0,
       0,
+      0,
       0
     ],
     "haiku": [
-      13,
       0,
       0,
       0,
       4,
       24,
+      0,
       0,
       0,
       0,
@@ -76,9 +76,9 @@
       0,
       0,
       0,
-      0,
       11,
       8,
+      0,
       0,
       0,
       0,
@@ -92,9 +92,9 @@
       0,
       0,
       0,
+      10,
+      10,
       0,
-      10,
-      10,
       0,
       0,
       0,
@@ -106,48 +106,16 @@
   },
   "today_models": [],
   "cost_split": {
-    "Claude Sonnet": 1938.0,
-    "Claude Haiku": 290.4,
-    "Claude Opus": 4650.0,
+    "Claude Sonnet": 906.0,
+    "Claude Haiku": 181.2,
+    "Claude Opus": 2819.9999999999995,
     "Gemini Pro": 122.0,
     "Gemini Flash": 161.6
   },
   "total_sessions": 72,
   "anthropic_real": {
-    "today": [
-      {
-        "model": "claude-haiku-4-5-20251001",
-        "input_tokens": 20782,
-        "output_tokens": 15930,
-        "cache_read": 0,
-        "cost": 0.080346
-      }
-    ],
-    "by_day": {
-      "2026-03-16": [
-        {
-          "model": "claude-haiku-4-5-20251001",
-          "input_tokens": 149896,
-          "output_tokens": 42822,
-          "cache_read": 0,
-          "cost": 0.291205
-        }
-      ],
-      "2026-03-17": [
-        {
-          "model": "claude-haiku-4-5-20251001",
-          "input_tokens": 20782,
-          "output_tokens": 15930,
-          "cache_read": 0,
-          "cost": 0.080346
-        }
-      ]
-    },
-    "source": "anthropic_api",
-    "latest_day": "2026-03-17",
-    "total_cost": {
-      "2026-03-16": 0.2912,
-      "2026-03-17": 0.0803
-    }
+    "today": [],
+    "by_day": {},
+    "source": "estimated"
   }
 }
