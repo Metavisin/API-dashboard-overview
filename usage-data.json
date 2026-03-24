@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-23T23:20:43.027793+00:00",
+  "generated_at": "2026-03-24T00:20:48.131770+00:00",
   "budget": {
     "spend_cap": 6.77,
     "set_at": "2026-03-05T14:58:28.813Z"
@@ -115,10 +115,10 @@
     "today": [
       {
         "model": "claude-haiku-4-5-20251001",
-        "input_tokens": 1603,
-        "output_tokens": 886,
+        "input_tokens": 35496,
+        "output_tokens": 31333,
         "cache_read": 0,
-        "cost": 0.004826
+        "cost": 0.153729
       }
     ],
     "by_day": {
@@ -148,14 +148,24 @@
           "cache_read": 0,
           "cost": 0.004826
         }
+      ],
+      "2026-03-23": [
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 35496,
+          "output_tokens": 31333,
+          "cache_read": 0,
+          "cost": 0.153729
+        }
       ]
     },
     "source": "anthropic_api",
-    "latest_day": "2026-03-20",
+    "latest_day": "2026-03-23",
     "total_cost": {
       "2026-03-18": 0.1377,
       "2026-03-19": 0.1242,
-      "2026-03-20": 0.0048
+      "2026-03-20": 0.0048,
+      "2026-03-23": 0.1537
     }
   }
 }
