@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-03-30T10:29:27.843730+00:00",
+  "generated_at": "2026-03-30T11:29:31.203898+00:00",
   "budget": {
-    "spend_cap": 6.77,
-    "set_at": "2026-03-05T14:58:28.813Z"
+    "spend_cap": null,
+    "set_at": null
   },
   "errors_today": 0,
   "rate_events": [],
