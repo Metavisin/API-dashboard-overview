@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-30T11:29:31.203898+00:00",
+  "generated_at": "2026-03-30T12:29:34.509567+00:00",
   "budget": {
     "spend_cap": null,
     "set_at": null
@@ -37,7 +37,7 @@
       0,
       0,
       0,
-      0
+      3
     ],
     "opus": [
       0,
@@ -104,8 +104,18 @@
       0
     ]
   },
-  "today_models": [],
-  "cost_split": {},
+  "today_models": [
+    {
+      "model": "anthropic/claude-sonnet-4-6",
+      "calls": 3,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 54.0
+    }
+  ],
+  "cost_split": {
+    "Claude Sonnet": 54.0
+  },
   "total_sessions": 72,
   "anthropic_real": {
     "today": [
