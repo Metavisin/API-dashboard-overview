@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-31T12:31:00.311232+00:00",
+  "generated_at": "2026-03-31T13:31:04.082318+00:00",
   "budget": {
     "spend_cap": null,
     "set_at": null
@@ -37,7 +37,7 @@
       0,
       0,
       3,
-      0
+      36
     ],
     "opus": [
       0,
@@ -53,7 +53,7 @@
       0,
       0,
       0,
-      0
+      32
     ],
     "haiku": [
       0,
@@ -104,9 +104,95 @@
       0
     ]
   },
-  "today_models": [],
+  "today_models": [
+    {
+      "model": "anthropic/claude-sonnet-4-5",
+      "calls": 4,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 72.0
+    },
+    {
+      "model": "anthropic/claude-sonnet-4-5-20250929",
+      "calls": 4,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 72.0
+    },
+    {
+      "model": "anthropic/claude-sonnet-4-0",
+      "calls": 4,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 72.0
+    },
+    {
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "calls": 4,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 72.0
+    },
+    {
+      "model": "anthropic/claude-3-7-sonnet-latest",
+      "calls": 4,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 40.0
+    },
+    {
+      "model": "anthropic/claude-3-7-sonnet-20250219",
+      "calls": 4,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 40.0
+    },
+    {
+      "model": "anthropic/claude-3-5-sonnet-20241022",
+      "calls": 4,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 40.0
+    },
+    {
+      "model": "anthropic/claude-3-5-sonnet-20240620",
+      "calls": 4,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 40.0
+    },
+    {
+      "model": "anthropic/claude-3-sonnet-20240229",
+      "calls": 4,
+      "provider": "anthropic",
+      "family": "Claude Sonnet",
+      "est_cost": 40.0
+    },
+    {
+      "model": "anthropic/claude-opus-4-6",
+      "calls": 4,
+      "provider": "anthropic",
+      "family": "Claude Opus",
+      "est_cost": 360.0
+    },
+    {
+      "model": "anthropic/claude-opus-4-5",
+      "calls": 4,
+      "provider": "anthropic",
+      "family": "Claude Opus",
+      "est_cost": 360.0
+    },
+    {
+      "model": "anthropic/claude-opus-4-5-20251101",
+      "calls": 4,
+      "provider": "anthropic",
+      "family": "Claude Opus",
+      "est_cost": 360.0
+    }
+  ],
   "cost_split": {
-    "Claude Sonnet": 54.0
+    "Claude Sonnet": 542.0,
+    "Claude Opus": 2559.9999999999995
   },
   "total_sessions": 72,
   "anthropic_real": {
